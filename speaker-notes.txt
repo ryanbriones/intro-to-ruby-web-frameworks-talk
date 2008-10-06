@@ -1,0 +1,306 @@
+Introduction to Ruby Web Frameworks
+
+Hello! My name is Ryan Briones. I work for a consultancy based in
+Columbus, OH called Edgecase where my offical title is "Server Monkey
+/ Code Samurai." While I do spend a sizable amount of time doing Sys
+Admin, (but that's another talk) my main job is focused on developing
+web applications primarily with Ruby.
+
+Today we're going to talk briefly about a few of the choices you have
+when choosing both Ruby as a language for web development and try to
+get through some of the more well known options you have for pre-built
+web frameworks including:
+
+* Rack
+* Ruby on Rails
+* Merb
+* Camping
+* Sinatra
+
+Keep in mind that this is a very "high level" intro talk. It's design
+to get you excited about what Ruby has to offer and to help you make
+the proper decision when deciding to develop a web application with
+Ruby. With that said, lets dive in.
+
+We're going to start out by defining what we mean when we say use the
+term "framework." What exactly does it give us? Is it really worth it?
+
+First, a framework usual contains a collection of resuable code. This
+can be anything from extending the core language to enable conviences
+in for developers to make their code more consice to resuable bits of
+architecture.
+
+Next, especially in the case of the Ruby web frameworks we're going to
+talk about, a framework normal try to provide a level of abstraction
+concerning the general domain to keep developers out of the
+"low-level" details. For us, the most useful abstraction will be not
+having to deal with raw HTTP requests and responses. In all of our
+examples, the frameworks in question will handle that for us.
+
+Domain specificity is something that developers generally don't talk
+about as much or maybe "deem important" when deciding what framework
+to use. I beg to differ. Being a fulltime Ruby developer I tend to
+hear a lot of "Rails doesn't do this" or "Rails doesn't scale",
+etc. This is rediciulous. Granted it's domain has become much more
+general over the last 3 years, Rails is still designed only to do a
+specific list of thing great. And it does them greatly.
+
+Now let's talk about how Ruby fits into this discussion. When thinking
+about the language your using when developing, it's important to
+consider things like how the language is going to make you more
+productive and how it's flexiblity can help you make your code more
+consise, readable and maintainable.
+
+In honor of this year's elections, we're going to start by talking
+about Ruby's Objected-Oriented paradigm. Ruby designed to be fully
+object-oriented and has been since day one and is first class. Since
+everything in Ruby is an object, that gives us the ability to call
+methods on anything including the return values of those method calls:
+
+User.all.reject { |user| user.admin? }.each do |user|
+  user.migrate
+  user.save
+end
+
+Ruby also gives developers powerful control over their object using
+contructs such as open classes, mixins and fine-grained
+metaprogramming hooks. This powerful control allows Ruby developers to
+add powerful abstractions to the language itself that don't
+neccesiarily belong in the core language.
+
+I believe that these give Ruby the edge on being very readable and in
+a sense beautiful. Obviously this is completely a matter of taste, but
+for me this is important.
+
+On the downside, there's some dirty rumors going around that MRI, Matz
+Ruby Interpreter and the official 1.8 implementation, has performance
+issues. When sources caught up to Ruby creator Yukihiro Matsumoto he
+was quoted saying "Hey, I'm a language designer, not a language
+implementor." "That's why Ruby 1.9 is being implemented by somebody
+else." Fortunately since the rise of Rails apps and it's liberal usage of
+our server's RAM, enterprising developers have spent time making MRI
+perform MUCH better. If you're interested in this work, check out the Ruby
+Enterprise Edition.
+
+Another issue that may keep you from using Ruby is that it doesn't
+have a library to do X. Not to mention that your company has already
+spent many man hours developing libraries for your current platform.
+
+But I believe there's hope for the future. There are several Ruby
+implementations both on the horizon and fully working.
+
+* YARV, the official Ruby 1.9 implementation. C-based
+* JRuby, targeting Ruby 1.8 for the JVM
+* Rubinius, targeting Ruby 1.8 as a Ruby VM written in Ruby, or as
+  much Ruby as possible 
+* IronRuby, targeting Ruby 1.8 for .NET's Dynamic Language Runtime
+* Ruby on the Gemstone/S platform...mysterious!
+
+Now that we've set a foundation let's talk about a few Ruby Web
+Frameworks that I've been able to use and appreciate.
+
+We're going to start with by talking about a tiny web framework by
+Christian Neukirchen called Rack. Rack is unique from the other web
+frameworks that we're going to talk about today becuase it serves two
+different roles in web framework land. Rack aims "to provide a minimal
+API for connecting web servers and web frameworks."
+
+First, Rack provides a very simple API for web application and
+framework developers. In the simplest case Rack just needs to be given
+a module that response to the call method and returns an array of the
+HTTP Response Code, headers as a hash and the output as an array (so
+that we can chunk the data as needed). That's it. We have a web
+application. As a framework developer, we can take this and call our
+dispatcher from it and now our framwork is able to interface with any
+web server handler that Rack supports. 
+
+Which brings us to our second use, which is that Rack enables us the
+choice to bring our web application to whatever application server we
+choose. This gives use the opportunity to choose a threaded server
+because our web application deals mostly in file uploads or to choose
+an evented server since our application deals only in API
+requests. Also, all of the next 4 frameworks we're going to talk about
+either depend, offer a configuration, or are working on an
+implementation using Rack.
+
+Now, let's talk about the framework that I'm sure most everyone here
+has at least heard about; Ruby on Rails. Rails, is an MVC style
+framework created by David Hennimier Hanson extracted from real world
+web application development with Ruby on 37signals' flagship
+application, Basecamp. The ideas that Rails uses are new or original,
+but it's opinionated style focused on developer happiness really
+changed the way the game was played for a lot of people.
+
+From the beginning, being able to get up and running with Rails as
+quickly as possible was very important to the project and code
+generation plays a big role in this. Rails makes these generators
+available through the script/generate command. Lets see here in a clip
+how David uses code generators to help get a blog going in under 15
+minutes.
+
+That clip helps use touch on another major tenant of using Rails to
+create your web application: Convention over Configuration. Rails,
+being opinionated, trys to provide as many sensible defaults and keep
+us from having to write eleventy-billion configuration files before
+our system becomes usable. This manifests itself in many aspects of
+the system. For instance for models in our system, from underscore
+seperated singular-named files to singular camel-cased class names to
+pluralized and underscorized table names. With just a blank class
+definition that inherits from the ActiveRecord::Base class we can
+create object instances that have complete access to rows in our
+table. Rails also provides predefined paths that are added to the load
+path at runtime. Putting files in the places and sticking to the
+underscore/camelcase convention gives use easy access to them via
+Ruby's require statement.
+
+I feel a little obligated to talk about the Golden Path as well. Where
+Rails provides a lot of nice quick macros make our lives easier when
+developing, it can also get in our way when trying to veer from the
+"standard" use case. 
+
+However, when configuration is needed, Rails generally try to give it
+to use in a nice little domain specific language wrapped package. The
+DSLs used in the defining our models give use a way to describe our
+relationships to other models and business rules that apply to our
+data. Similarly, the Rails router gives another "language" for
+defining how url paths map to controllers and actions in our
+application.
+
+Productivity isn't the only mantra of Rails. It also makes quality a
+priority and gives it's developers the opportunity to practice
+test-driven development by making testings a first-class citizen
+across the board. Even the code generators creat unit and functional
+tests for your to match your models and controllers.
+
+Rails is not without it's issues though. Probably first on the list of
+those who use Rails daily is that it's "magicalness" can sometimes be
+a problem for both maintainablity and performance. If Rails goes too
+far is more personal preference than anything, though, in my
+opinion.
+
+Another complaint I hear amoungst my local community is the lack of
+support for old versions. Rails does do it's best to maintain it's
+APIs, but I have a feeling it's more of the community that tends to
+move with the latest and greatest. And how can you blame us? The Rails git
+repo has that feature I've really wanted since I've started to use
+Rails. Your milage may very.
+
+Now let's talk a little about Merb. Mongrel + Erb started out as a
+little side project by Ezra Zygmontowicz in order to provide a
+seperate app to handle file uploads in an efficient manner along side
+his Rails apps. At first this framework used a lot of the standard
+Rails libraries for things like persistance and Ruby core extensions,
+but very early Merb developers saw how they could improve on the
+efficancy of web application development and started to move their own
+way.
+
+First Merb tries to deliver only the things that a web application
+framework should do. Nothing more. This is provided to us via the
+merb-core gem. This gives us the libraries to get our application
+running in the VC structure we're used to. VC? Merb does not included
+code to access the database in core. This is by design as Merb gives
+us the option to use the database library of our choice. Two other
+repos give us access to the libraries that help us get back some of
+the functionality that we've come to expect from frameworks that have
+followed rails. Merb-more provides code you're most likely to use in
+your standard systems or in your daily development like caching
+strategies and code generation tools. Merb-plugins on the other
+provides some "nices to haves" like helper functions for specific
+functionality like form macros and also is the place where database
+plugins are maintained.
+
+Merb also strives to "eschew magic" first in the framework code as
+much as possible. "Code doesn't have to be a monument to personal
+cleverness," Ezra says. Just because there's a shortcut way to write
+your code doesn't make it good. I see this in my day-to-day Rails
+development where I tend to ask my colleages "If this were your first
+day as a Rails programmer, would you be able to understand this code?"
+
+Readablity isn't the only reason. Clever code may also not be as
+performant. "Simple scales better," Ezra says. He's not just saying
+that as justification either. The merb team as put code through it's
+paces by creating some simple benchmarks to make sure their
+understanding is sound. You can see these in the merb distribution
+under "simple benches."
+
+Downsides? For getting that standard app up in going to 80% of the
+functionality, Rails is faster. Merb justifies this by being more
+flexible for that remaining 20% that is probably more complex and
+probably doesn't follow the "golden path".
+
+Even though it's improved in the last few months, Merb is still very
+much lacking in learning reasources. To make things worse, there seems
+to be a smattering of merb tutorials for old incompatible
+releases. There have been a few sites poping up here and there like
+merbunity.com and the "core" team tend to have their blogs updated
+with useful information. Merb is also working towards a "stable api
+complete" release and I think that this will force some learning
+reasources to come into fruition. Until then, you're on your own.
+
+Next on our list is Camping. Camping is a micro web framework from the
+mind of Ruby mad scientist _why the lucky stiff, author of the
+infamous "Poignaint Guide to Ruby." So micro that the base framework
+is less than 4k of code. This is something that _why appears to be
+proud of. But let's talk about what might make camping a framework you
+might want to use.
+
+First, Camping tries to keep things simple and designed so that web
+applications would fit all in one file. That's right, the entire MVC
+broken up into modules namespaced with the name of your app. As you
+might be able to see here in this example we have a small camping app
+that defines a namespace of "Foo" and a little routing that maps a get
+request to the root url to render the home_index view that you can see
+there in the bottom. You might see a potential problem here. First, we
+don't have any "model" definitions or schemas defined here, and this
+already has the ability to get a bit wordy if we decide to create an
+application much bigger than what we have here.
+
+That's because Camping would rather you build a few small apps split
+on functionality than 1 large app including the entire domain. As seen
+here, we can create a few apps setup at the same top level directory
+and call our camping application server from there. Camping then makes
+our micro apps available from the root of our application server
+path. If you can see the picture here, the blog app in our top-level
+directory is available at /blog. The is another thing to note
+here. Using this structure means that all of our micro apps are going
+to share a single databases with the tables for that specific app
+prefixed with it's name. In theory this is good, because your apps are
+likely to be sharing data or even designed to work on the same
+data. Others might see this as an issue.
+
+Camping was also designed using the MVC structure and a lot of
+Rails'isms (including using ActiveRecord for the ORM and ActiveSupport
+for Ruby core extensions) so that when your apps really do outgrow the
+framework, that you can easily port them up to another MVC framework.
+
+The one big downer I see with Camping is that it does not include a
+standard testing framework. There is a least one 3rd party framework
+available called mosquito written by Geoffory Grosenbach, but it looks
+like it hasn't been in active development for a while. This, I think,
+keeps Camping corralled in the space of prototyping apps, which may
+have been what you were thinking as I was describing it. However, this
+hasn't stopped people from using it in production.
+
+Last, but not least, we're going to touch on Sinatra. Sinatra, about a
+year old now, is design as a way to create simple, fast, RESTful apps
+with the fewest setup, dependencies and LOC. Sinatra, unlike the other
+frameworks we've talked about, I believe only has 1 external
+dependancy. Rack.
+
+Here's a Hello World example from Sinatra. First Sinatra uses a simple
+DSLish for describing web requests. We have the HTTP verb, followed by
+the path with optional path parameters, a la Rails routing. Then a
+block that will be run when this path is called. This allows us to
+create spectaculorly simple web applications. Unfortunately I think
+"simple" is the keyword there. Although I can't claimed that I've tried
+to take an app more complex than a form mailer, I feel like this style
+can get easily out of control just like with Camping. But unlike
+Camping, Sinatra's web DSL is not very portable leaving us with a
+possible complete rewrite when our app starts getting out of control.
+
+Obviously I don't have the time to talk about all the Ruby Web
+Frameworks out there now, especially the ones I've never used, but
+here's a quick list of frameworks that are either getting noticed
+right now (like Ramaze and Mack) and a few that fallen by the wayside
+(IOWA). If the frameworks I've talked about don't fit your style, give
+one of these a look.
