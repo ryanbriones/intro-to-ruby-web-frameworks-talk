@@ -6,6 +6,10 @@
  * OSCON 2008 (Original)
  * CFP: Codemash 2009
 
+## Short Description
+
+An overview of a few Ruby Web Frameworks, including basic usage and how to pragmatically choose which one to use, and how Ruby makes them special.
+
 ## Abstract
 
 The Internet is changing at an exponential rate. Yesterday’s web pages have effectuated today’s web applications and the fresh, fertile soil that it brings is manifesting itself in a new crop of web frameworks that are driving this new frontier. The Ruby community isn’t holding back either. They’ve got the power and simplicity of the Ruby language on their side. They’re opinionated and pragmatic. And most of all, they’re having fun.
